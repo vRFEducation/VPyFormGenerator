@@ -31,7 +31,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/m_logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">VPyGUIGenerator</h3>
@@ -124,6 +124,7 @@ Download and install Python on your machine
    git clone https://github.com/vRFEducation/VPyFormGenerator
    ```
 2. Create a class in your application such as:
+   ```sh
   class Person:
     def __init__(self, name, age, height):
         self.name  = name
@@ -136,15 +137,21 @@ Download and install Python on your machine
         self.break_time = now.time()
         self.courses = ["DB", "DS", "Python"]
         self.work_hours = {"Jan": 100, "Feb": 50, "Mar": 120}
+    ```
+
 3. Import the library:
-  from  VPyFormGenerator.VPyGUIGenerator import VPyGUIGenerator
+   ```sh
+    from  VPyFormGenerator.VPyGUIGenerator import VPyGUIGenerator
+  ```
 4. Create PyQt app and call create_gui method of library:
+   ```sh
   import sys
   from PyQt6.QtWidgets import QApplication
   app = QApplication(sys.argv)
   dialog = VPyGUIGenerator.create_gui(p)
   dialog.show()
   app.exec()
+```
 5. Enjoy the dialog created!!!
 
    
@@ -206,7 +213,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Vahid Rahmanifard - [@twitter_handle](https://twitter.com/twitter_handle) - rahmanifard@live.com
+Vahid Rahmanifard - rahmanifard@live.com
 
 Project Link: [https://github.com/vRFEducation/VPyFormGenerator](https://github.com/vRFEducation/VPyFormGenerator)
 
@@ -231,7 +238,7 @@ Project Link: [https://github.com/vRFEducation/VPyFormGenerator](https://github.
 [license-url]: https://github.com/vRFEducation/VPyFormGenerator/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/vrahmanifard/
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: images/m_screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
