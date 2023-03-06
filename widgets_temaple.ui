@@ -1,0 +1,24 @@
+
+<item row="__row__" column="0">
+     <widget class="QLabel" name="label">
+          <property name="text">
+          <string   >__label__:</string>
+          </property>
+     </widget>
+     </item>
+<item row="__row__" column="1">
+     __prefix__
+     <widget class="__widget__" name="__name__">
+          __content__
+          <property name="field_name" stdset="0">
+               <string>__name__</string>
+          </property>
+          <property name="key" stdset="0">
+               <string>__key__</string>
+          </property>
+          <property name="prop_name" stdset="0">
+               <string>__prop_name__</string>
+          </property>    
+     </widget>
+     __postfix__
+</item>

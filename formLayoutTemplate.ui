@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SampleDialog</class>
+ <widget class="QDialog" name="SampleDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>406</width>
+    <height>174</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>__title__</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+        __content__
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SampleDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>342</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>164</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SampleDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>264</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>64</x>
+     <y>103</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+  <slots>
+    <slot>listAddButtonClicked()</slot>
+    <slot>listDeleteButtonClicked()</slot>
+    <slot>objectDetailButtonClicked()</slot>
+    <slot>tableAddButtonClicked()</slot>
+    <slot>tableDeleteButtonClicked()</slot>
+
+ </slots>
+</ui>
