@@ -47,11 +47,11 @@ class TypeInfo:
         file_name = ""
         
         if self.key == "list":
-            file_name = f"{TypeInfo.script_location}/list_widget_extra_prefix.ui"
+            file_name = f"{TypeInfo.script_location}/templates/list_widget_extra_prefix.ui"
         elif self.key == "object":
-            file_name = f"{TypeInfo.script_location}/object_extra_prefix.ui"
+            file_name = f"{TypeInfo.script_location}/templates/object_extra_prefix.ui"
         elif self.key == "dict":
-            file_name = f"{TypeInfo.script_location}/table_widget_extra_prefix.ui"
+            file_name = f"{TypeInfo.script_location}/templates/table_widget_extra_prefix.ui"
         else:
             return ""
         file=open(file_name,"r")
@@ -65,11 +65,11 @@ class TypeInfo:
         postfix =  ""
         file_name = ""
         if self.key == "list":
-            file_name = f"{TypeInfo.script_location}/list_widget_extra_postfix.ui"
+            file_name = f"{TypeInfo.script_location}/templates/list_widget_extra_postfix.ui"
         elif self.key == "object":
-            file_name = f"{TypeInfo.script_location}/object_extra_postfix.ui"
+            file_name = f"{TypeInfo.script_location}/templates/object_extra_postfix.ui"
         elif self.key == "dict":
-            file_name = f"{TypeInfo.script_location}/table_widget_extra_postfix.ui"
+            file_name = f"{TypeInfo.script_location}/templates/table_widget_extra_postfix.ui"
         else:
             return ""
         file=open(file_name,"r")

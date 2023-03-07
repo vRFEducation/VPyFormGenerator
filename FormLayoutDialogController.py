@@ -91,7 +91,7 @@ class FormLayoutDialogController(QtWidgets.QDialog):
     @pyqtSlot()
     def objectDetailButtonClicked(self):
         object_name = self.sender().property("for_object")
-        from VPyGUIGenerator import VPyGUIGenerator
+        from .VPyGUIGenerator import VPyGUIGenerator
         dialog = VPyGUIGenerator.create_gui(getattr(self.obj, object_name))
         dialog.exec()
         label_widget = self.get_widget(object_name)

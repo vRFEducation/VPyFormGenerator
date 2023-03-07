@@ -29,7 +29,7 @@ class VPyGUIGenerator:
     def create_new_template_file(cls, obj):
         object_name = obj.__class__.__name__
         template_file_name = f"{object_name}.ui"
-        file=open(f"{VPyGUIGenerator.script_location}/formLayoutTemplate.ui","r")
+        file=open(f"{VPyGUIGenerator.script_location}/templates/formLayoutTemplate.ui","r")
         content = file.read()        
         file.close()
         
@@ -49,7 +49,7 @@ class VPyGUIGenerator:
     @classmethod
     def create_widgets(cls, obj):
         widgets = ""
-        file=open(f"{VPyGUIGenerator.script_location}/widgets_temaple.ui","r")
+        file=open(f"{VPyGUIGenerator.script_location}/templates/widgets_temaple.ui","r")
         widget_template = file.read()        
         file.close()
         class_prefix = F"_{obj.__class__.__name__}__"
