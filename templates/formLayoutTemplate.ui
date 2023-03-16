@@ -35,33 +35,14 @@
    <signal>rejected()</signal>
    <receiver>SampleDialog</receiver>
    <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>342</x>
-     <y>153</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>164</x>
-     <y>116</y>
-    </hint>
-   </hints>
   </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
    <receiver>SampleDialog</receiver>
    <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>264</x>
-     <y>155</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>64</x>
-     <y>103</y>
-    </hint>
-   </hints>
   </connection>
+  __connections__
  </connections>
   <slots>
     <slot>listAddButtonClicked()</slot>

@@ -3,6 +3,7 @@ from .FormLayoutDialogController import FormLayoutDialogController
 from pathlib import Path
 
 class VPyGUIGenerator:
+    __connections = ""
     type_dict = {
         "str": TypeInfo("QLineEdit", "text", "string", "str"),
         "int": TypeInfo("QSpinBox", "value", "number", "int"),
@@ -15,18 +16,52 @@ class VPyGUIGenerator:
         "dict" : TypeInfo("QTableWidget", "dict", "string", "dict"),
         "object": TypeInfo("QLabel", "text", "string", "object")
     }
+    
+    widget_dict = {
+        "qslider": TypeInfo("QSlider", "value", "number", "slider"),
+        "qpushbutton": TypeInfo("QPushButton", "text", "", ""),
+        "qcombobox": TypeInfo("QComboBox", "currentIndex", "number", "combo"),
+        "qradiobutton": TypeInfo("QRadioButton", "checked", "bool", "radio"),
+        "qcheckbox": TypeInfo("QCheckBox", "checked", "bool", "bool"),
+        "qspinbox": TypeInfo("QSpinBox", "value", "number", "int"),
+        "qdoublespinbox": TypeInfo("QDoubleSpinBox", "value", "double", "double"),
+        "qcommandlinkbutton": TypeInfo("QCommandLinkButton", "", "", ""),
+        "qbuttonbox": TypeInfo("QButtonBox", "", "", ""),
+        "qlistview": TypeInfo("QListView", "", "", ""),
+        "qtreeview": TypeInfo("QTreeView", "", "", ""),
+        "qtableview": TypeInfo("QTableView", "", "", ""),
+        "qgroupbox": TypeInfo("QGroupBox", "", "", ""),
+        "qtabwidget": TypeInfo("qtabwidget", "", "", ""),
+        "qfontcombobox": TypeInfo("QFontComboBox", "", "", ""),
+        "qplaintextedit": TypeInfo("QPlainTextEdit", "", "", ""),
+        "qdial": TypeInfo("QDial", "value", "number", "dial"),
+        "qcalendarwidget": TypeInfo("QCalendarWidget", "", "", ""),
+        "qlcdnumber": TypeInfo("QLCDNumber", "value", "double", "lcd"),
+        "qprogressbar": TypeInfo("QProgressBar", "value", "number", "progressbar"),
+        "qlabel": TypeInfo("QLabel", "text", "string", "label"),
+        "multichoice": TypeInfo("QScrollArea", "multichoice", "checkbox", "multichoice"),
+        "qlistwidget": TypeInfo("QListWidget", "list", "string", "list"),
+        "list": TypeInfo("QListWidget", "list", "string", "list"),
+        "table" : TypeInfo("QTableWidget", "dict", "string", "dict"),
+        "qtablewidget" : TypeInfo("QTableWidget", "dict", "string", "dict"),
+        
+
+
+    }
     script_location = Path(__file__).absolute().parent
     def __init__(self):
         pass
+        
     @classmethod
     def create_gui(cls, obj):
-        template_file_name = cls.create_new_template_file(obj)
-        
+        template_file_name = cls.create_new_template_file(obj)        
         form = FormLayoutDialogController(obj, template_file_name)
         return form
     
     @classmethod
     def create_new_template_file(cls, obj):
+        cls.__connections = ""
+
         object_name = obj.__class__.__name__
         template_file_name = f"{object_name}.ui"
         file=open(f"{VPyGUIGenerator.script_location}/templates/formLayoutTemplate.ui","r")
@@ -40,6 +75,8 @@ class VPyGUIGenerator:
         widgets = cls.create_widgets(obj)
         
         content = content.replace("__content__", widgets)
+
+        content = content.replace("__connections__", cls.__connections)
         
         template_file = open( template_file_name, 'w' )
         template_file.write( content )
@@ -54,41 +91,90 @@ class VPyGUIGenerator:
         file.close()
         class_prefix = F"_{obj.__class__.__name__}__"
         row = 0
+        # collect public fields 
         for k,v in obj.__dict__.items():
             if k.startswith(class_prefix):
                 continue
            
             field_type = type(v).__name__
-            widget_info = cls.get_widget_for_type(field_type)
+            widget_info = cls.type_dict.get(field_type, None)
             new_widget = ""
             if(widget_info != None):
                 new_widget = cls.create_standard_widgets(widget_template, row, widget_info, k)
             else:
-                widget_info = cls.get_widget_for_type("object")
+                widget_info = cls.type_dict.get("object", None)
                 new_widget = cls.create_standard_widgets(widget_template, row, widget_info, k)
                 
             new_widget = new_widget.replace("__content__", widget_info.get_content(getattr(obj, k)))            
-
-            
-
-            
             widgets += new_widget
             row += 1
+        # collect properties
+        property_dict = (dict(obj.__class__.__dict__))
+        for k, v in property_dict.items():
+            if type(v) != property:
+                continue
+            if v.fset != None:
+                if len(v.fset.__annotations__) > 0:
+                    an  = v.fset.__annotations__
+                    mydict = {}
+                    for kk, vv in an.items():
+                        newValue = vv.replace("::", "$%^")
+                        mydict = dict((k1.strip(), v1.strip()) for k1,v1 in 
+                                      (item.split(':') for item in newValue.split(',')))
+                        for k2,v2 in mydict.items():
+                            if "$%^" in v2:
+                                mydict[k2] = v2.replace("$%^", "::")
+                                
+                    widget_info = cls.widget_dict[mydict["widget"].lower()]
+                    new_widget = cls.create_custom_widgets(mydict,widget_info, widget_template, row, k)
+            elif property_dict[v].fget != None:
+                pass
+
+            value = ""
+            try:
+                value = getattr(obj, k)
+            except:
+                if (widget_info.tag_name == "number" or widget_info.tag_name == "double") and value == '':
+                     value = 0
+                elif widget_info.tag_name == "bool" and value == '':
+                    value = "false"
+                else:
+                    value = ""
+            
+            new_widget = new_widget.replace("__content__", widget_info.get_content(value))
+            new_widget = new_widget.replace("__value__", str(value))
+            connection = widget_info.get_connection(k)
+            if connection != None:
+                cls.__connections += connection
+                
             # print(new_widget)
-        # for k,v in obj.__class__.__dict__.items():
-        #     print(type(v).__name__)
-        #     if(issubclass(type(v), property)):
-        #         print(getattr(obj, k))
+            widgets += new_widget
+
+            row += 1
+
         return widgets
-    
-    
-    @classmethod
-    def get_widget_for_type(cls, type):
-        # print(type)
-        return cls.type_dict.get(type, None)
 
     @classmethod
-    def create_standard_widgets(cls, widget_template, row, widget_info, name):
+    def create_custom_widgets(cls, property_dict, widget_info, widget_template, row, name):
+        
+        if "widget" not in property_dict or property_dict["widget"].lower() not in cls.widget_dict:
+            raise TypeError(f"Invalid widget for property '{name}'")
+        widget_info.set_properties(property_dict)
+        new_widget = widget_template.replace("__row__", str(row))
+        new_widget = new_widget.replace("__label__", name.capitalize())
+        new_widget = new_widget.replace("__widget__", widget_info.widget_name)        
+        
+        new_widget = new_widget.replace("__key__", widget_info.key)
+        new_widget = new_widget.replace("__prefix__", widget_info.get_prefix())
+        new_widget = new_widget.replace("__postfix__", widget_info.get_postfix())
+        new_widget = new_widget.replace("__properties__", widget_info.get_properties())
+        new_widget = new_widget.replace("__name__", name)
+        if widget_info.prop_name != None:
+            new_widget = new_widget.replace("__prop_name__", widget_info.prop_name)
+        return new_widget
+        
+    @classmethod
+    def create_standard_widgets (cls, widget_template, row, widget_info, name):
         new_widget = widget_template.replace("__row__", str(row))
         new_widget = new_widget.replace("__label__", name.capitalize())
         new_widget = new_widget.replace("__widget__", widget_info.widget_name)
@@ -97,7 +183,9 @@ class VPyGUIGenerator:
         new_widget = new_widget.replace("__prop_name__", widget_info.prop_name)
         new_widget = new_widget.replace("__prefix__", widget_info.get_prefix())
         new_widget = new_widget.replace("__postfix__", widget_info.get_postfix())
+        new_widget = new_widget.replace("__property__", widget_info.get_properties())
         new_widget = new_widget.replace("__name__", name)
         return new_widget
+        
         
         

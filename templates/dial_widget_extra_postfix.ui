@@ -1,0 +1,12 @@
+</item>
+    <item>
+        <widget class="QLabel" name="label___name__">
+            <property name="text" stdset="0">
+                <string>__value__</string>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignCenter</set>
+            </property>
+        </widget>
+    </item>
+</layout>

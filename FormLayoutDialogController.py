@@ -5,7 +5,7 @@ from PyQt6.QtCore import pyqtSlot
 
 
 class FormLayoutDialogController(QtWidgets.QDialog):
-    scalar_type = ["str", "int", "float", "bool", "time", "date"]
+    scalar_type = ["str", "int", "float", "bool", "time", "date", "slider", "dial"]
 
     def __init__(self, obj, template_file_name):
         super(FormLayoutDialogController, self).__init__()
@@ -47,12 +47,18 @@ class FormLayoutDialogController(QtWidgets.QDialog):
     def accept(self):
         for w in self.children():
             field_name = w.property("field_name")
-            
+            if field_name == "sample":
+                q = 10
             if field_name != None:
                 key = w.property("key")
                 field = w.property("prop_name")
-                if(key in FormLayoutDialogController.scalar_type):
-                    if key == "bool":
+                if key == "progressbar":
+                    continue
+                if key == "multichoice":
+                  selected_items = self.get_selected_items(w)
+                  setattr(self.obj, field_name, selected_items)
+                elif(key in FormLayoutDialogController.scalar_type):
+                    if key == "bool":   
                         setattr(self.obj, field_name, str(w.property(field)).capitalize())
                     else:
                         setattr(self.obj, field_name, w.property(field))
@@ -68,6 +74,9 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     setattr(self.obj, field_name, dc)
                 elif(field == "datetime"):
                      setattr(self.obj, field_name, w.dateTime())
+                elif(key == "combo"):
+                    setattr(self.obj, field_name, w.property("currentText"))
+
         super().accept()
         
     @pyqtSlot()
@@ -128,4 +137,16 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         table_widget = self.get_widget(table_name)
         table_widget.removeRow(table_widget.currentRow())
     
+    def get_selected_items(self, items):
+        widgets = items.findChildren(QtWidgets.QCheckBox)
+        if len(widgets) == 0:
+            widgets = items.findChildren(QtWidgets.QRadioButton)        
+            for ch in widgets:
+                if ch.isChecked():
+                    return ch.text()
+        result = []
+        for ch in widgets:
+            if ch.isChecked():
+                result.append(ch.text())
+        return result
 
