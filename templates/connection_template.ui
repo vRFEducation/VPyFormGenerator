@@ -1,0 +1,6 @@
+<connection>
+    <sender>__source__</sender>
+    <signal>__signal__</signal>
+    <receiver>__destination__</receiver>
+    <slot>__slot__</slot>
+</connection>

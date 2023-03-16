@@ -2,7 +2,7 @@
 <item row="__row__" column="0">
      <widget class="QLabel" name="label">
           <property name="text">
-          <string   >__label__:</string>
+          <string>__label__:</string>
           </property>
      </widget>
      </item>
@@ -18,7 +18,8 @@
           </property>
           <property name="prop_name" stdset="0">
                <string>__prop_name__</string>
-          </property>    
+          </property> 
+          __properties__   
      </widget>
      __postfix__
 </item>
