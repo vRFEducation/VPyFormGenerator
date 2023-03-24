@@ -1,3 +1,16 @@
   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+      <widget class="QLineEdit" name="listFilter___name">
+       <property name="placeholderText">
+        <string>Filter __name__</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="for_list_filter" stdset="0">
+        <string>__name__</string>
+      </property>  
+      </widget>
+     </item>
+    <item>
   

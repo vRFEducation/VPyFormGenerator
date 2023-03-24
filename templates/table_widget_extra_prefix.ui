@@ -1,2 +1,15 @@
    <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+         <widget class="QLineEdit" name="tableFilter___name">
+          <property name="placeholderText">
+           <string>Filter __name__(Key)</string>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="for_table_filter" stdset="0">
+            <string>__name__</string>
+          </property>  
+         </widget>
+        </item>
     <item>
