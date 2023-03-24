@@ -1,0 +1,181 @@
+ </item>
+    <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Row Count:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cmbPageCount___name__">
+           <item>
+            <property name="text">
+             <string>10</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>20</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>50</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>100</string>
+            </property>
+           </item>
+           <property name="for_grid" stdset="0">
+            <string>__name__</string>
+          </property>  
+          </widget>
+         </item>
+        <item>
+         <widget class="QPushButton" name="btnFirstPage___name__">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="enabled">
+            <bool>false</bool>
+           </property>     
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;&lt;</string>
+          </property>
+          <property name="for_grid" stdset="0">
+            <string>__name__</string>
+          </property>  
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnPrevPage___name__">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="enabled">
+            <bool>false</bool>
+           </property>     
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;</string>
+          </property>
+          <property name="for_grid" stdset="0">
+            <string>__name__</string>
+          </property>  
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spnPageNumber___name__">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="suffix">
+           <string>/__page_count__</string>
+          </property>
+          <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>__maximum__</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+          <property name="for_grid" stdset="0">
+            <string>__name__</string>
+          </property>  
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnNextPage___name__">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&gt;</string>
+          </property>
+          <property name="for_grid" stdset="0">
+            <string>__name__</string>
+          </property>  
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnLastPage___name__">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&gt;&gt;</string>
+          </property>
+          <property name="for_grid" stdset="0">
+            <string>__name__</string>
+          </property>  
+         </widget>
+        </item>
+       </layout>
+    </item>
+   </layout>

@@ -1,6 +1,6 @@
 
     
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 from PyQt6.QtCore import pyqtSlot
 
 
@@ -13,6 +13,9 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         self.resize(self.sizeHint().width(), self.size().height() );
         self.connect_predefined_slots()
         self.obj = obj
+        self.__objectListDict = {}
+        self.finalize_ui();
+        
     
     
     def connect_predefined_slots(self):     
@@ -37,8 +40,43 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                 else:
                     w.clicked.connect(self.tableDeleteButtonClicked)
                 continue
+            
+            is_filter_list = w.property("for_list_filter")
+            if is_filter_list != None:
+                if w.objectName().startswith("listFilter"):
+                    w.textChanged.connect(self.listFilterChanged)
+                continue
+            
+            is_filter_table = w.property("for_table_filter")
+            if is_filter_table != None:
+                if w.objectName().startswith("tableFilter"):
+                    w.textChanged.connect(self.tableFilterChanged)
+                continue
+            
+            is_grid_paginator = w.property("for_grid")
+            if is_grid_paginator != None:
+                if w.objectName().startswith("btnFirstPage"):
+                    w.clicked.connect(self.simpleGridFirstPageButtonClicked)
+                elif w.objectName().startswith("btnPrevPage"):
+                    w.clicked.connect(self.simpleGridPreviousPageButtonClicked)
+                elif w.objectName().startswith("btnNextPage"):
+                    w.clicked.connect(self.simpleGridNextPageButtonClicked)
+                elif w.objectName().startswith("btnLastPage"):
+                    w.clicked.connect(self.simpleGridLastPageButtonClicked)
+                elif w.objectName().startswith("cmbPageCount"):
+                    w.currentIndexChanged.connect(self.simpleGridPageCountComboChanged)
+                continue
 
+    def finalize_ui(self):
+        for w in self.children():
+            prop_name = w.property('prop_name')
+            if prop_name == 'simplegrid':
+                w.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+                field = w.property("field_name")
+                self.__objectListDict[field] = getattr(self.obj, field)
+                
 
+    
     @pyqtSlot()
     def reject(self):
         super().reject()
@@ -76,6 +114,10 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                      setattr(self.obj, field_name, w.dateTime())
                 elif(key == "combo"):
                     setattr(self.obj, field_name, w.property("currentText"))
+                elif key == 'simplegrid':
+                    grid_name = w.property("field_name")
+                    self.presave_grid_data(grid_name)
+                    setattr(self.obj, field_name, self.__objectListDict[field_name])
 
         super().accept()
         
@@ -127,10 +169,6 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         key_widget.clear()
         value_widget.clear()
     
-    
-        
-
-    
     @pyqtSlot()
     def tableDeleteButtonClicked(self):
         table_name = self.sender().property("for_table")
@@ -150,3 +188,141 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                 result.append(ch.text())
         return result
 
+    @pyqtSlot()
+    def listFilterChanged(self):
+        list_name = self.sender().property("for_list_filter")
+        list_widget = self.get_widget(list_name)
+        text = self.sender().property("text").lower()
+        for i in range(list_widget.count()):
+            list_widget.item(i).setHidden(text not in list_widget.item(i).text().lower())
+        
+    @pyqtSlot()
+    def tableFilterChanged(self):
+        table_name = self.sender().property("for_table_filter")
+        table = self.get_widget(table_name)
+        filter = self.sender().property("text").lower()
+        for i in range(table.rowCount()):
+            text = table.item(i, 0).text().lower()
+            table.setRowHidden(i, filter not in text)
+
+    @pyqtSlot()
+    def simpleGridFirstPageButtonClicked(self):
+        self.change_grid_page(self.sender, "first")
+    
+    @pyqtSlot()
+    def simpleGridPreviousPageButtonClicked(self):
+        self.change_grid_page(self.sender, "previous")
+
+    
+    @pyqtSlot()
+    def simpleGridNextPageButtonClicked(self):
+        self.change_grid_page(self.sender, "next")
+    
+    @pyqtSlot()
+    def simpleGridLastPageButtonClicked(self):
+        self.change_grid_page(self.sender, "last")
+
+    @pyqtSlot()
+    def simpleGridPageCountComboChanged(self):
+        self.change_grid_page(self.sender, "row_per_page")
+        
+        
+    def change_grid_page(self, sender, action):
+        grid_name = sender().property("for_grid")
+        grid = self.get_widget(grid_name)
+        spn_page = self.get_widget(f"spnPageNumber_{grid_name}")
+        self.enable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}", f"btnLastPage_{grid_name}",f"btnNextPage_{grid_name}"))
+        fieldname = grid.property("field_name")
+        datasource = self.__objectListDict[fieldname]
+
+        
+        self.presave_grid_data(grid_name)
+        
+        current_page = int(grid.property("current_page"))
+        page_count = int(grid.property("page_count"))
+        row_per_page = int(grid.property("row_per_page"))
+        
+                
+        grid.clearContents()
+
+        if action == "first":
+            current_page = 1
+            self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}"))
+        elif action == "previous":
+            current_page -= 1
+            if current_page == 1:
+                self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}"))
+        elif action == "next":
+            current_page += 1
+            if current_page == page_count:
+                self.disable_widgets((f"btnLastPage_{grid_name}", f"btnNextPage_{grid_name}"))
+        elif action == "last":
+            current_page = page_count
+            self.disable_widgets((f"btnLastPage_{grid_name}",f"btnNextPage_{grid_name}"))
+        elif action == "row_per_page":
+            current_page = 1
+            row_per_page = int(sender().currentText())
+            import math
+            page_count = math.ceil(len(datasource) / row_per_page)
+            spn_page.setMaximum(page_count)
+            spn_page.setSuffix(f"/{page_count}")
+            if page_count > 1:
+                self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}"))
+            else:
+                self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}", f"btnLastPage_{grid_name}",f"btnNextPage_{grid_name}"))
+        
+        start = (current_page - 1) * row_per_page
+        end = current_page * row_per_page 
+        end = end if end < len(datasource) else len(datasource)
+        grid.setRowCount(end - start)
+        for r in range(start, end):
+            obj = datasource[r]
+            for c in range(grid.columnCount()):
+                label = grid.horizontalHeaderItem(c).text()
+                field =  ''.join([label[:1].lower(), label[1:]])
+                value = getattr(obj, field)
+                item = QtWidgets.QTableWidgetItem(str(value))
+                if type(value).__name__ not in FormLayoutDialogController.scalar_type:
+                    item.setFlags(QtCore.Qt.ItemFlag.NoItemFlags)
+                grid.setItem(r - start, c, item)
+                
+        
+        spn_page.setValue(int(current_page))
+        grid.setProperty("current_page", current_page)
+        grid.setProperty("page_count", page_count )
+        grid.setProperty("row_per_page", row_per_page)
+        
+    def presave_grid_data(self, grid_name):
+        grid = self.get_widget(grid_name)
+        fieldname = grid.property("field_name")
+        datasource = self.__objectListDict[fieldname]
+
+        is_paginated = bool(grid.property("is_paginated"))
+        current_page = int(grid.property("current_page"))
+        row_per_page = int(grid.property("row_per_page")) if is_paginated else len(datasource)
+            
+        start = (current_page - 1) * row_per_page
+        end = current_page * row_per_page 
+        end = end if end < len(datasource) else len(datasource)
+        for r in range(start, end):
+            obj = datasource[r]
+            for c in range(grid.columnCount()):
+                label = grid.horizontalHeaderItem(c).text()
+                field =  ''.join([label[:1].lower(), label[1:]])
+                field_type = type(getattr(obj, field)).__name__
+                if field_type not in FormLayoutDialogController.scalar_type:
+                    continue
+                value = grid.item(r - start, c).text()
+                setattr(obj, field, str(value))
+        
+    def disable_widgets(self, names):
+        for name in names:
+            w = self.get_widget(name)
+            w.setEnabled(False)
+    
+    def enable_widgets(self, names):
+        for name in names:
+            w = self.get_widget(name)
+            w.setEnabled(True)
+    
+            

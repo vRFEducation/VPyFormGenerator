@@ -28,4 +28,15 @@
 - Developers can hide/show tools section of List and Table items in previous version
 - 2-way bindings supported and changes applied automatically to source object
 
+## v0.3.0
+
+### Added or Changed
+- Support for DateTime, Date, Time added to properties
+- Object presentation via label and detail button added to properties
+- minimumSize, maximumSize and geometry properties supported(with specific value notation)
+- Filtering add to list and table used for dictionaties
+- Grid widget added to library in order to show list of objects in grid format
+    - Pagination added to grid
+    - change number of rows in grid added
+
 

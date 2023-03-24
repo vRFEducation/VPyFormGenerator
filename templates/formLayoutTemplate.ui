@@ -50,6 +50,12 @@
     <slot>objectDetailButtonClicked()</slot>
     <slot>tableAddButtonClicked()</slot>
     <slot>tableDeleteButtonClicked()</slot>
+    <slot>simpleGridFirstPageButtonClicked()</slot>
+    <slot>simpleGridPreviousPageButtonClicked()</slot>
+    <slot>simpleGridNextPageButtonClicked()</slot>
+    <slot>simpleGridLastPageButtonClicked()</slot>
+    <slot>simpleGridPageCountComboChanged()</slot>
+
 
  </slots>
 </ui>

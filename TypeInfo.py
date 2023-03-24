@@ -64,6 +64,8 @@ class TypeInfo:
                     </layout>
                 </widget>
                 """
+        elif self.key == "simplegrid":
+            content = self.create_simple_grid(value)
         else:            
             if field_type in TypeInfo.scalar_type:
                 if field_type == "bool":
@@ -101,6 +103,8 @@ class TypeInfo:
             file_name = f"{TypeInfo.script_location}/templates/slider_widget_extra_prefix.ui"
         elif self.key == "dial" and "showLabel" in self.extra_data:
             file_name = f"{TypeInfo.script_location}/templates/dial_widget_extra_prefix.ui"
+        elif self.key == "simplegrid" and "showPaginator" in self.extra_data:
+            file_name = f"{TypeInfo.script_location}/templates/simple_grid_extra_prefix.ui"
         else:
             return ""
         file=open(file_name,"r")
@@ -123,6 +127,8 @@ class TypeInfo:
             file_name = f"{TypeInfo.script_location}/templates/slider_widget_extra_postfix.ui"
         elif self.key == "dial" and "showLabel" in self.extra_data:
             file_name = f"{TypeInfo.script_location}/templates/dial_widget_extra_postfix.ui"
+        elif self.key == "simplegrid" and "showPaginator" in self.extra_data:
+            file_name = f"{TypeInfo.script_location}/templates/simple_grid_extra_postfix.ui"
         else:
             return ""
         file=open(file_name,"r")
@@ -154,6 +160,28 @@ class TypeInfo:
                         </item>
                     """
                 self.extra_data["combo_items"] = items
+            elif k == "maximumsize" or k == "minimumsize":
+                size = v.replace("[", "").replace("]", "").split(";")  
+                self.properties += f"""
+                <property name="{originalKey}">
+                    <size>
+                    <width>{size[0]}</width>
+                    <height>{size[1]}</height>
+                    </size>
+                </property>
+                """
+            elif k == "geometry":
+                size = v.replace("[", "").replace("]", "").split(";")  
+                self.properties += f"""
+                <property name="geometry">
+                    <rect>
+                    <x>{size[0]}</x>
+                    <y>{size[1]}</y>
+                    <width>{size[2]}</width>
+                    <height>{size[3]}</height>
+                    </rect>
+                </property>
+                """
             elif widget == "multichoice":
                 if k == "items":
                     items = v.replace("[", "").replace("]", "").split(";") 
@@ -164,6 +192,8 @@ class TypeInfo:
                     self.extra_data[k] = v
             elif (widget == "qslider" or widget == "qdial") and k == "showlabel":
                 self.extra_data[originalKey] = v
+            elif (widget == "simplegrid"):
+                continue
             else:
                 tag = "string"
                 if v.isnumeric():
@@ -298,11 +328,72 @@ class TypeInfo:
                 connection = connection.replace("__destination__", f"label_{name}")
                 connection = connection.replace("__slot__", "setNum(int)")
                 return connection
-                    
-            
-        
-        
         return None
+    
+    def create_simple_grid(self, object_list):
+
+        count = len(object_list) if "showPaginator" not in self.extra_data else 10
+        is_paginated = "true" if "showPaginator"  in self.extra_data and self.extra_data["showPaginator"] == "true" else "false"
+        content = f"""
+        <property name="alternatingRowColors">
+            <bool>true</bool>
+        </property>"
+        <property name="current_page" stdset="0">
+            <string>1</string>
+          </property>
+        <property name="row_per_page" stdset="0">
+            <string>10</string>
+        </property>
+        <property name="page_count" stdset="0">
+            <string>__page_count__</string>
+          </property>
+        <property name="is_paginated" stdset="0">
+            <string>{is_paginated}</string>
+          </property>
+        
+        """
+        
+        for i in range(count):
+            content += f"""
+                <row>
+                    <property name="text">
+                        <string>{i + 1}</string>
+                    </property>
+                </row>
+            """
+        for col in self.extra_data["columns"]:
+            content += f"""
+                <column>
+                    <property name="text">
+                        <string>{col.capitalize()}</string>
+                    </property>
+                </column>
+            """
+        row = 0
+        
+        for obj in object_list:
+            col = 0
+            for c in self.extra_data["columns"]:
+                content += f"""
+                    <item row ="{row}" column = "{col}">
+                        <property name="text">
+                            <string>{getattr(obj, c)}</string>
+                        </property>
+                        __flags__
+                    </item>
+                """
+                flags = ""
+                if type(getattr(obj, c)).__name__ not in TypeInfo.scalar_type:
+                    flags = """
+                    <property name="flags">
+                        <set>ItemIsSelectable</set>
+                    </property>
+                    """
+                content = content.replace("__flags__", flags)
+                col += 1
+            row += 1
+        
+        return content 
         
         
     

@@ -44,6 +44,15 @@ class VPyGUIGenerator:
         "list": TypeInfo("QListWidget", "list", "string", "list"),
         "table" : TypeInfo("QTableWidget", "dict", "string", "dict"),
         "qtablewidget" : TypeInfo("QTableWidget", "dict", "string", "dict"),
+        "object": TypeInfo("QLabel", "text", "string", "object"),
+        "date": TypeInfo("QDateEdit", "date", "date", "date"),
+        "time": TypeInfo("QTimeEdit", "time", "time", "time"),
+        "datetime": TypeInfo("QDateTimeEdit", "datetime", "datetime", "datetime"),
+        "qdate": TypeInfo("QDateEdit", "date", "date", "date"),
+        "qtime": TypeInfo("QTimeEdit", "time", "time", "time"),
+        "qdatetime": TypeInfo("QDateTimeEdit", "datetime", "datetime", "datetime"),
+        "simplegrid" : TypeInfo("QTableWidget", "simplegrid", "list", "simplegrid"),        
+
         
 
 
@@ -106,6 +115,7 @@ class VPyGUIGenerator:
                 new_widget = cls.create_standard_widgets(widget_template, row, widget_info, k)
                 
             new_widget = new_widget.replace("__content__", widget_info.get_content(getattr(obj, k)))            
+            
             widgets += new_widget
             row += 1
         # collect properties
@@ -125,8 +135,19 @@ class VPyGUIGenerator:
                             if "$%^" in v2:
                                 mydict[k2] = v2.replace("$%^", "::")
                                 
-                    widget_info = cls.widget_dict[mydict["widget"].lower()]
-                    new_widget = cls.create_custom_widgets(mydict,widget_info, widget_template, row, k)
+                        if mydict["widget"].lower() == "simplegrid":
+                            value = getattr(obj, k)
+                            if len(value) == 0:
+                                continue
+
+                            sample_type = type(value[0])
+                            for o in value:
+                                if type(o) != sample_type:
+                                    raise TypeError("All objects inside list must have same type")
+                            mydict["columns"] = cls.get_grid_columns(value[0])
+                            
+                        widget_info = cls.widget_dict[mydict["widget"].lower()]
+                        new_widget = cls.create_custom_widgets(mydict, widget_info, widget_template, row, k)
             elif property_dict[v].fget != None:
                 pass
 
@@ -143,6 +164,14 @@ class VPyGUIGenerator:
             
             new_widget = new_widget.replace("__content__", widget_info.get_content(value))
             new_widget = new_widget.replace("__value__", str(value))
+            
+            if mydict["widget"].lower() == "simplegrid":
+                import math
+                page_count = math.ceil(len(value) / 10)
+                new_widget = new_widget.replace("__page_count__", str(page_count))
+                new_widget = new_widget.replace("__maximum__", str(page_count))
+
+            
             connection = widget_info.get_connection(k)
             if connection != None:
                 cls.__connections += connection
@@ -183,9 +212,28 @@ class VPyGUIGenerator:
         new_widget = new_widget.replace("__prop_name__", widget_info.prop_name)
         new_widget = new_widget.replace("__prefix__", widget_info.get_prefix())
         new_widget = new_widget.replace("__postfix__", widget_info.get_postfix())
-        new_widget = new_widget.replace("__property__", widget_info.get_properties())
+        new_widget = new_widget.replace("__properties__", widget_info.get_properties())
         new_widget = new_widget.replace("__name__", name)
         return new_widget
+    
+    @classmethod
+    def get_grid_columns(cls, obj):
+        columns = []
+        class_prefix = F"_{obj.__class__.__name__}__"
+        
+        for k,v in obj.__dict__.items():
+            if not k.startswith(class_prefix):
+                columns.append(k)
+                
+        property_dict = (dict(obj.__class__.__dict__))
+        for k, v in property_dict.items():
+            if type(v) != property:
+                continue
+            if v.fset != None:
+                if len(v.fset.__annotations__) > 0:
+                    columns.append(k)
+
+        return columns
         
         
         
