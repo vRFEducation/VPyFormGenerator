@@ -39,4 +39,9 @@
     - Pagination added to grid
     - change number of rows in grid added
 
+## v0.3.0
 
+### Added or Changed
+- CRUD operations support completely in SimpleGrid
+- Clear All option added to list and table
+- Icons added to add, detele, edit and new buttons for better look and feel

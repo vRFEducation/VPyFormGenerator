@@ -41,24 +41,17 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <italic>true</italic>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>+</string>
-        </property>
         <property name="for_table" stdset="0">
           <string>__name__</string>
         </property>  
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="tableDelButton___name__">
-        <property name="sizePolicy">
+        <widget class="QToolButton" name="tableDelButton___name__">
+          <property name="popupMode">
+            <enum>QToolButton::MenuButtonPopup</enum>
+          </property>
+         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
@@ -70,20 +63,9 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <italic>true</italic>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>-</string>
-        </property>
         <property name="for_table" stdset="0">
           <string>__name__</string>
         </property>  
-
        </widget>
       </item>
      </layout>

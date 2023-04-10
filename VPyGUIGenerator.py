@@ -19,6 +19,7 @@ class VPyGUIGenerator:
     
     widget_dict = {
         "qslider": TypeInfo("QSlider", "value", "number", "slider"),
+        "qlineedit": TypeInfo("QLineEdit", "text", "string", "lineedit"),
         "qpushbutton": TypeInfo("QPushButton", "text", "", ""),
         "qcombobox": TypeInfo("QComboBox", "currentIndex", "number", "combo"),
         "qradiobutton": TypeInfo("QRadioButton", "checked", "bool", "radio"),
