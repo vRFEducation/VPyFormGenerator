@@ -19,9 +19,6 @@
     <bold>true</bold>
     </font>
     </property>
-    <property name="text">
-    <string>...</string>
-    </property>
     <property name="for_object" stdset="0">
         <string>__name__</string>
     </property>  

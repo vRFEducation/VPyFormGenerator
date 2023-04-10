@@ -1,11 +1,14 @@
 
     
-from PyQt6 import QtWidgets, uic, QtCore
+from PyQt6 import QtWidgets, uic, QtCore, QtGui
 from PyQt6.QtCore import pyqtSlot
+from pathlib import Path
+
 
 
 class FormLayoutDialogController(QtWidgets.QDialog):
-    scalar_type = ["str", "int", "float", "bool", "time", "date", "slider", "dial"]
+    scalar_type = ["str", "int", "float", "bool", "time", "date", "slider", "dial", "lineedit"]
+    script_location = Path(__file__).absolute().parent
 
     def __init__(self, obj, template_file_name):
         super(FormLayoutDialogController, self).__init__()
@@ -24,21 +27,43 @@ class FormLayoutDialogController(QtWidgets.QDialog):
             if is_list_button != None:
                 if w.objectName().startswith("add"):
                     w.clicked.connect(self.listAddButtonClicked)
-                else:
+                    w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/save.png"))
+                elif w.objectName().startswith("del"):
                     w.clicked.connect(self.listDeleteButtonClicked)
+                    w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/del.png"))
+                    clear_all_acion = QtWidgets.QWidgetAction(w)
+                    clear_all_acion.setText("Clear All")
+                    clear_all_acion.setProperty("for_list", is_list_button)
+                    clear_all_acion.triggered.connect(self.clear_all_action_triggered)
+                    menu = QtWidgets.QMenu()
+                    menu.addAction(clear_all_acion)
+                    w.setMenu(menu)
+                elif w.objectName().startswith("lineEdit"):
+                    w.editingFinished.connect(self.listAddButtonClicked)
                 continue
             
             is_detail_button = w.property("for_object")
             if is_detail_button != None:
                 w.clicked.connect(self.objectDetailButtonClicked)
+                w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/detail.png"))
                 continue
             
             is_table_button = w.property("for_table")
             if is_table_button != None:
                 if w.objectName().startswith("tableAdd"):
                     w.clicked.connect(self.tableAddButtonClicked)
+                    w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/save.png"))
                 else:
                     w.clicked.connect(self.tableDeleteButtonClicked)
+                    w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/del.png"))
+                    clear_all_acion = QtWidgets.QWidgetAction(w)
+                    clear_all_acion.setText("Clear All")
+                    clear_all_acion.setProperty("for_table", is_table_button)
+                    clear_all_acion.triggered.connect(self.clear_all_table_action_triggered)
+                    menu = QtWidgets.QMenu()
+                    menu.addAction(clear_all_acion)
+                    w.setMenu(menu)
+
                 continue
             
             is_filter_list = w.property("for_list_filter")
@@ -65,16 +90,31 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     w.clicked.connect(self.simpleGridLastPageButtonClicked)
                 elif w.objectName().startswith("cmbPageCount"):
                     w.currentIndexChanged.connect(self.simpleGridPageCountComboChanged)
-                continue
+                elif w.objectName().startswith("btnAddNew"):
+                    w.clicked.connect(self.simpleGridAddNewButtonClicked)
+                    w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/add.png"))
+
 
     def finalize_ui(self):
         for w in self.children():
             prop_name = w.property('prop_name')
             if prop_name == 'simplegrid':
                 w.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+                page_count = int(w.property("page_count"))
+                grid_name = w.property("field_name")
+
+                if page_count > 1:
+                    self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}"))
+                else:
+                    self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}", f"btnLastPage_{grid_name}",f"btnNextPage_{grid_name}"))
+        
+
                 field = w.property("field_name")
                 self.__objectListDict[field] = getattr(self.obj, field)
-                
+                self.add_grid_action(field)
+                tmp_filtering = w.property("showFiltering")
+                if tmp_filtering!= None and tmp_filtering.lower() == "true":
+                    self.add_grid_filter(field)
 
     
     @pyqtSlot()
@@ -124,11 +164,16 @@ class FormLayoutDialogController(QtWidgets.QDialog):
     @pyqtSlot()
     def listAddButtonClicked(self):
         list_name = self.sender().property("for_list")
+        self.add_item_to_list(list_name)
+    
+    def add_item_to_list(self, list_name):
         list_widget = self.get_widget(list_name)
         lineEdit_widget = self.get_widget("lineEdit_"+list_name)
         if list_widget != None and lineEdit_widget != None:
-            list_widget.addItem(lineEdit_widget.text())
-            lineEdit_widget.clear()
+            text = lineEdit_widget.text().strip()
+            if text != "":
+                list_widget.addItem(text)                
+                lineEdit_widget.clear()
         
 
     @pyqtSlot()
@@ -235,35 +280,30 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         fieldname = grid.property("field_name")
         datasource = self.__objectListDict[fieldname]
 
-        
-        self.presave_grid_data(grid_name)
+        if action != "refresh":
+            self.presave_grid_data(grid_name)
         
         current_page = int(grid.property("current_page"))
         page_count = int(grid.property("page_count"))
         row_per_page = int(grid.property("row_per_page"))
         
                 
-        grid.clearContents()
 
         if action == "first":
             current_page = 1
-            self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}"))
         elif action == "previous":
             current_page -= 1
-            if current_page == 1:
-                self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}"))
         elif action == "next":
             current_page += 1
-            if current_page == page_count:
-                self.disable_widgets((f"btnLastPage_{grid_name}", f"btnNextPage_{grid_name}"))
         elif action == "last":
             current_page = page_count
-            self.disable_widgets((f"btnLastPage_{grid_name}",f"btnNextPage_{grid_name}"))
-        elif action == "row_per_page":
-            current_page = 1
-            row_per_page = int(sender().currentText())
+        elif action in ("row_per_page", "refresh"):
+            current_page = 1 if action != "refresh" else current_page
+            row_per_page = int(sender().currentText()) if action != "refresh" else row_per_page
             import math
             page_count = math.ceil(len(datasource) / row_per_page)
+            if current_page > page_count:
+                current_page = page_count
             spn_page.setMaximum(page_count)
             spn_page.setSuffix(f"/{page_count}")
             if page_count > 1:
@@ -271,13 +311,34 @@ class FormLayoutDialogController(QtWidgets.QDialog):
             else:
                 self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}", f"btnLastPage_{grid_name}",f"btnNextPage_{grid_name}"))
         
+        if current_page == 1:
+                self.disable_widgets((f"btnFirstPage_{grid_name}", f"btnPrevPage_{grid_name}"))
+        if current_page == page_count:
+                self.disable_widgets((f"btnLastPage_{grid_name}", f"btnNextPage_{grid_name}"))
+        
+        spn_page.setValue(int(current_page))
+        grid.setProperty("current_page", current_page)
+        grid.setProperty("page_count", page_count )
+        grid.setProperty("row_per_page", row_per_page)
+        
+        self.load_simple_grid_data(grid_name)
+        
+    
+    def load_simple_grid_data(self, grid_name):
+        grid = self.get_widget(grid_name)
+        current_page = int(grid.property("current_page"))
+        row_per_page = int(grid.property("row_per_page"))
+        fieldname = grid.property("field_name")
+        datasource = self.__objectListDict[fieldname]
+
+        grid.clearContents()
         start = (current_page - 1) * row_per_page
         end = current_page * row_per_page 
         end = end if end < len(datasource) else len(datasource)
         grid.setRowCount(end - start)
         for r in range(start, end):
             obj = datasource[r]
-            for c in range(grid.columnCount()):
+            for c in range(grid.columnCount() - 1):
                 label = grid.horizontalHeaderItem(c).text()
                 field =  ''.join([label[:1].lower(), label[1:]])
                 value = getattr(obj, field)
@@ -285,12 +346,8 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                 if type(value).__name__ not in FormLayoutDialogController.scalar_type:
                     item.setFlags(QtCore.Qt.ItemFlag.NoItemFlags)
                 grid.setItem(r - start, c, item)
-                
-        
-        spn_page.setValue(int(current_page))
-        grid.setProperty("current_page", current_page)
-        grid.setProperty("page_count", page_count )
-        grid.setProperty("row_per_page", row_per_page)
+        self.add_grid_action(grid_name)
+
         
     def presave_grid_data(self, grid_name):
         grid = self.get_widget(grid_name)
@@ -306,7 +363,7 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         end = end if end < len(datasource) else len(datasource)
         for r in range(start, end):
             obj = datasource[r]
-            for c in range(grid.columnCount()):
+            for c in range(grid.columnCount() - 1):
                 label = grid.horizontalHeaderItem(c).text()
                 field =  ''.join([label[:1].lower(), label[1:]])
                 field_type = type(getattr(obj, field)).__name__
@@ -314,6 +371,118 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     continue
                 value = grid.item(r - start, c).text()
                 setattr(obj, field, str(value))
+        
+    def add_grid_action(self, grid_name):
+        grid = self.get_widget(grid_name)
+        fieldname = grid.property("field_name")
+        datasource = self.__objectListDict[fieldname]
+
+             
+        current_page = int(grid.property("current_page"))
+        page_count = int(grid.property("page_count"))
+        row_per_page = int(grid.property("row_per_page"))
+        
+        start = 0
+        end = current_page * row_per_page 
+        end = end if end < len(datasource) else len(datasource)
+        
+        col = grid.columnCount() - 1
+        for r in range(start, end):
+            container = QtWidgets.QWidget()
+            layout = QtWidgets.QHBoxLayout()
+            edit_button = QtWidgets.QPushButton("")
+            delete_button = QtWidgets.QPushButton("")
+            layout.addWidget(edit_button)
+            layout.addWidget(delete_button)     
+            layout.setContentsMargins(0, 0, 0, 0)       
+            container.setLayout(layout)
+            index = (current_page - 1)* row_per_page + r
+            edit_button.setProperty("index", index)
+            delete_button.setProperty("index", index)
+            edit_button.setProperty("field_name", fieldname)
+            delete_button.setProperty("field_name", fieldname)
+            edit_button.setProperty("for_grid", grid_name)
+            delete_button.setProperty("for_grid", grid_name)
+            edit_button.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/edit.png"))
+            delete_button.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/del.png"))
+            
+            edit_button.clicked.connect(self.simplegrid_editbutton_clicked)
+            delete_button.clicked.connect(self.simplegrid_deletebutton_clicked)
+            grid.setCellWidget(r, col, container)
+            
+                
+    def simplegrid_deletebutton_clicked(self):
+        index = self.sender().property("index")
+        fieldname = self.sender().property("field_name")
+        datasource = self.__objectListDict[fieldname]
+        result = self.delete_confirmation(datasource[index])
+        if result == 16384: # yes pressed    
+            datasource.remove(datasource[index])
+            grid_name = self.sender().property("for_grid")        
+            grid = self.get_widget(grid_name)
+            # grid.removeRow(index)
+            # print(datasource)
+            self.change_grid_page(self.sender, "refresh") 
+            # current_page = int(grid.property("current_page"))
+            # page_count = int(grid.property("page_count"))
+            # row_per_page = int(grid.property("row_per_page"))
+            # grid.clearContents()
+            # start = (current_page - 1) * row_per_page
+            # end = current_page * row_per_page 
+            # end = end if end < len(datasource) else len(datasource)
+            # grid.setRowCount(end - start)
+            # for r in range(start, end):
+            #     obj = datasource[r]
+            #     for c in range(grid.columnCount() - 1):
+            #         label = grid.horizontalHeaderItem(c).text()
+            #         field =  ''.join([label[:1].lower(), label[1:]])
+            #         value = getattr(obj, field)
+            #         item = QtWidgets.QTableWidgetItem(str(value))
+            #         if type(value).__name__ not in FormLayoutDialogController.scalar_type:
+            #             item.setFlags(QtCore.Qt.ItemFlag.NoItemFlags)
+            #         grid.setItem(r - start, c, item)
+            # self.add_grid_action(grid_name)
+        
+    def simplegrid_editbutton_clicked(self):
+        index = self.sender().property("index")
+        fieldname = self.sender().property("field_name")
+        datasource = self.__objectListDict[fieldname]
+
+        from .VPyGUIGenerator import VPyGUIGenerator
+        dialog = VPyGUIGenerator.create_gui(datasource[index])
+        dialog.exec()
+        
+        grid_name = self.sender().property("for_grid")        
+        grid = self.get_widget(grid_name)
+        current_page = int(grid.property("current_page"))
+        page_count = int(grid.property("page_count"))
+        row_per_page = int(grid.property("row_per_page"))
+        start = (current_page - 1) * row_per_page
+
+        obj = datasource[index]
+        for c in range(grid.columnCount() - 1):
+            label = grid.horizontalHeaderItem(c).text()
+            field =  ''.join([label[:1].lower(), label[1:]])
+            value = getattr(obj, field)
+            item = QtWidgets.QTableWidgetItem(str(value))
+            if type(value).__name__ not in FormLayoutDialogController.scalar_type:
+                item.setFlags(QtCore.Qt.ItemFlag.NoItemFlags)
+            grid.setItem(index - start, c, item)
+            
+    def simpleGridAddNewButtonClicked(self):
+        grid_name = self.sender().property("for_grid")
+        grid = self.get_widget(grid_name)
+        field_name = grid.property("field_name")
+        datasource = self.__objectListDict[field_name]
+        obj = type(datasource[0])()
+        
+        from .VPyGUIGenerator import VPyGUIGenerator
+        dialog = VPyGUIGenerator.create_gui(obj)
+        result = dialog.exec()
+        if result == 1: # ok pressed
+            datasource.append(obj)
+            self.change_grid_page(self.sender, "refresh")
+        
         
     def disable_widgets(self, names):
         for name in names:
@@ -324,5 +493,45 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         for name in names:
             w = self.get_widget(name)
             w.setEnabled(True)
+            
+    def delete_confirmation(self, obj):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Question)
+        msg.setText("Are you sure?!")
+        msg.setWindowTitle("Confirm")
+        msg.setDetailedText(str(obj))
+        msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
+
+        retval = msg.exec()
+        return retval
+    
+    def add_grid_filter(self, grid_name):
+        grid = self.get_widget(grid_name) 
+        fieldname = grid.property("field_name")
+        datasource = self.__objectListDict[fieldname]
+        columns = grid.property("grid_columns")
+        if columns == None:
+            return
+        columns = columns.split(",")
+        grid.insertRow(0)
+        for c in range(len(columns)):
+            widget = QtWidgets.QLineEdit()
+            widget.setPlaceholderText("Filter " + columns[c])
+            widget.setFrame(False)
+            widget.setProperty("for_grid", grid_name)
+            grid.setCellWidget(0, c, widget)
+        
+    def clear_all_action_triggered(self):
+        list_name = self.sender().property("for_list")
+        list_widget = self.get_widget(list_name)
+        if list_widget != None:
+            list_widget.clear()
+            
+    def clear_all_table_action_triggered(self):
+        table_name = self.sender().property("for_table")
+        table_widget = self.get_widget(table_name)
+        if table_widget != None:
+            table_widget.clearContents()
+            table_widget.setRowCount(0)
     
             

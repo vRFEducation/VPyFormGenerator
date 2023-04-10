@@ -192,8 +192,19 @@ class TypeInfo:
                     self.extra_data[k] = v
             elif (widget == "qslider" or widget == "qdial") and k == "showlabel":
                 self.extra_data[originalKey] = v
-            elif (widget == "simplegrid"):
-                continue
+            elif widget == "simplegrid":
+                if k == "showfiltering":
+                     self.properties += f"""
+                        <property name="{originalKey}" stdset="0">
+                            <string>{v}</string>
+                        </property>
+                        """
+                elif k == "columns":
+                    self.properties += f"""            
+                        <property name="grid_columns" stdset="0">
+                            <string>{','.join(v)}</string>
+                        </property>
+                    """
             else:
                 tag = "string"
                 if v.isnumeric():
@@ -332,7 +343,7 @@ class TypeInfo:
     
     def create_simple_grid(self, object_list):
 
-        count = len(object_list) if "showPaginator" not in self.extra_data else 10
+        count = len(object_list) if "showPaginator" not in self.extra_data else min(10, len(object_list))
         is_paginated = "true" if "showPaginator"  in self.extra_data and self.extra_data["showPaginator"] == "true" else "false"
         content = f"""
         <property name="alternatingRowColors">
@@ -366,6 +377,13 @@ class TypeInfo:
                 <column>
                     <property name="text">
                         <string>{col.capitalize()}</string>
+                    </property>
+                </column>
+            """
+        content += f"""
+                <column>
+                    <property name="text">
+                        <string>Actions</string>
                     </property>
                 </column>
             """
