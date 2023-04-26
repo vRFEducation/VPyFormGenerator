@@ -90,12 +90,12 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot]][product-screenshot]
-[![Product Name Screen Shot]][product-screenshot2]
-[![Product Name Screen Shot]][product-screenshot3]
-[![Product Name Screen Shot]][product-screenshot4]
-[![Product Name Screen Shot]][product-screenshot5]
-[![Product Name Screen Shot]][product-screenshot6]
+[![Product Name Screen Shot][product-screenshot]]
+[![Product Name Screen Shot][product-screenshot2]]
+[![Product Name Screen Shot][product-screenshot3]]
+[![Product Name Screen Shot][product-screenshot4]]
+[![Product Name Screen Shot][product-screenshot5]]
+[![Product Name Screen Shot][product-screenshot6]]
 
 
 Creating GUI for Python application, in my opinion, is a tedious task and sometimes it's really hard to create and manage forms and dialogs inside an application. 
