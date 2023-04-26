@@ -45,3 +45,9 @@
 - CRUD operations support completely in SimpleGrid
 - Clear All option added to list and table
 - Icons added to add, detele, edit and new buttons for better look and feel
+
+## v0.4.0
+
+### Added or Changed
+- Minor bugs in SimpleGrid widget resolved
+- Filtering option added to SimpleGrid widget

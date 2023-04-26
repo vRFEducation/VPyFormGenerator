@@ -26,8 +26,11 @@ class TypeInfo:
         """
       
 
-        if self.widget_name == "QComboBox":
-                content = content.replace("__value__", str(self.extra_data["combo_items"].index(value)))
+        if self.widget_name == "QComboBox" and "combo_items" in self.extra_data.keys():
+            index = -1
+            if value in self.extra_data["combo_items"]:
+                index = self.extra_data["combo_items"].index(value)
+            content = content.replace("__value__", str(index))
         elif self.widget_name == "QScrollArea":
             if len(self.extra_data["items"]) > 0:
                 orientation = "QVBoxLayout"
@@ -348,7 +351,7 @@ class TypeInfo:
         content = f"""
         <property name="alternatingRowColors">
             <bool>true</bool>
-        </property>"
+        </property>
         <property name="current_page" stdset="0">
             <string>1</string>
           </property>
@@ -363,15 +366,6 @@ class TypeInfo:
           </property>
         
         """
-        
-        for i in range(count):
-            content += f"""
-                <row>
-                    <property name="text">
-                        <string>{i + 1}</string>
-                    </property>
-                </row>
-            """
         for col in self.extra_data["columns"]:
             content += f"""
                 <column>
@@ -387,34 +381,4 @@ class TypeInfo:
                     </property>
                 </column>
             """
-        row = 0
-        
-        for obj in object_list:
-            col = 0
-            for c in self.extra_data["columns"]:
-                content += f"""
-                    <item row ="{row}" column = "{col}">
-                        <property name="text">
-                            <string>{getattr(obj, c)}</string>
-                        </property>
-                        __flags__
-                    </item>
-                """
-                flags = ""
-                if type(getattr(obj, c)).__name__ not in TypeInfo.scalar_type:
-                    flags = """
-                    <property name="flags">
-                        <set>ItemIsSelectable</set>
-                    </property>
-                    """
-                content = content.replace("__flags__", flags)
-                col += 1
-            row += 1
-        
-        return content 
-        
-        
-    
-    
-            
-
+        return content
