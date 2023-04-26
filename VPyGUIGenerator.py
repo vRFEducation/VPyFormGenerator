@@ -63,9 +63,9 @@ class VPyGUIGenerator:
         pass
         
     @classmethod
-    def create_gui(cls, obj):
+    def create_gui(cls, obj, overwrite = True):
         template_file_name = cls.create_new_template_file(obj)        
-        form = FormLayoutDialogController(obj, template_file_name)
+        form = FormLayoutDialogController(obj, template_file_name, overwrite)
         return form
     
     @classmethod
@@ -103,7 +103,7 @@ class VPyGUIGenerator:
         row = 0
         # collect public fields 
         for k,v in obj.__dict__.items():
-            if k.startswith(class_prefix):
+            if k.startswith(class_prefix) or k == "v_id":
                 continue
            
             field_type = type(v).__name__
@@ -176,10 +176,8 @@ class VPyGUIGenerator:
             connection = widget_info.get_connection(k)
             if connection != None:
                 cls.__connections += connection
-                
-            # print(new_widget)
+               
             widgets += new_widget
-
             row += 1
 
         return widgets

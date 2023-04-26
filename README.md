@@ -37,12 +37,18 @@
   <h3 align="center">VPyGUIGenerator</h3>
 
   <p align="center">
-  A simple and useful library to help you create GUI for your application with 1 line of code in Python
+  A simple and useful library to help you create GUI for your application with just 1 line of code in Python
     <br />
     <br />
     <a href="https://www.youtube.com/watch?v=IYn2XRqFxt4&ab_channel=vrfEducation">View Demo 1</a>
     <br />
     <a href="https://www.youtube.com/watch?v=_OTW9OuXKjI&ab_channel=vrfEducation">View Demo 2</a>
+    <br />
+    <a href="https://www.youtube.com/watch?v=AMEmSsgtQCU&ab_channel=vrfEducation">View Demo 3</a>
+    <br />
+    <a href="https://www.youtube.com/watch?v=7LRM_ksP8b8&ab_channel=vrfEducation">View Demo 4</a>
+    <br />
+    <a href="https://www.youtube.com/watch?v=yBFSU8m3gdg&ab_channel=vrfEducation">View Demo 5</a>
     <br />
     ·
     <a href="https://github.com/vRFEducation/VPyFormGenerator/issues">Report Bug</a>
@@ -84,11 +90,13 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]]
-[![Product Name Screen Shot][product-screenshot2]]
-[![Product Name Screen Shot][product-screenshot3]]
-[![Product Name Screen Shot][product-screenshot4]]
-[![Product Name Screen Shot][product-screenshot5]]
+[![Product Name Screen Shot][product-screenshot]
+[Product Name Screen Shot][product-screenshot2]
+[Product Name Screen Shot][product-screenshot3]
+[Product Name Screen Shot][product-screenshot4]
+[Product Name Screen Shot][product-screenshot5]
+[Product Name Screen Shot][product-screenshot6]]s
+
 
 Creating GUI for Python application, in my opinion, is a tedious task and sometimes it's really hard to create and manage forms and dialogs inside an application. 
 Although some library such as PyQt and PySide make it much easier to create GUI compare to TKinter, developers should create GUI using QtDesigner to write it completely in code. 
@@ -250,6 +258,7 @@ Project Link: [https://github.com/vRFEducation/VPyFormGenerator](https://github.
 [product-screenshot3]: images/m_screenshot3.png
 [product-screenshot4]: images/m_screenshot4.png
 [product-screenshot5]: images/m_screenshot5.png
+[product-screenshot6]: images/m_screenshot6.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
