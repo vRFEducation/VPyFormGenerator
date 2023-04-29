@@ -1,0 +1,8 @@
+<item row="__tab_row__" column="0" colspan="2">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     __tabs__
+    </widget>
+</item>

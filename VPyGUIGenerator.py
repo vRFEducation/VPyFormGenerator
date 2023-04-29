@@ -53,12 +53,11 @@ class VPyGUIGenerator:
         "qtime": TypeInfo("QTimeEdit", "time", "time", "time"),
         "qdatetime": TypeInfo("QDateTimeEdit", "datetime", "datetime", "datetime"),
         "simplegrid" : TypeInfo("QTableWidget", "simplegrid", "list", "simplegrid"),        
-
-        
-
-
     }
+    
     script_location = Path(__file__).absolute().parent
+    __group_widgets = {}
+    
     def __init__(self):
         pass
         
@@ -79,13 +78,10 @@ class VPyGUIGenerator:
         file.close()
         
         content = content.replace("__title__", object_name)
-        # content = content.replace("__width__", "400")
-        # content = content.replace("__height__", "300")
         
         widgets = cls.create_widgets(obj)
         
         content = content.replace("__content__", widgets)
-
         content = content.replace("__connections__", cls.__connections)
         
         template_file = open( template_file_name, 'w' )
@@ -95,6 +91,8 @@ class VPyGUIGenerator:
     
     @classmethod
     def create_widgets(cls, obj):
+        cls.__group_widgets = {}
+
         widgets = ""
         file=open(f"{VPyGUIGenerator.script_location}/templates/widgets_temaple.ui","r")
         widget_template = file.read()        
@@ -121,6 +119,7 @@ class VPyGUIGenerator:
             row += 1
         # collect properties
         property_dict = (dict(obj.__class__.__dict__))
+        
         for k, v in property_dict.items():
             if type(v) != property:
                 continue
@@ -146,9 +145,9 @@ class VPyGUIGenerator:
                                 if type(o) != sample_type:
                                     raise TypeError("All objects inside list must have same type")
                             mydict["columns"] = cls.get_grid_columns(value[0])
-                            
                         widget_info = cls.widget_dict[mydict["widget"].lower()]
-                        new_widget = cls.create_custom_widgets(mydict, widget_info, widget_template, row, k)
+                        tmp_row = "__row__" if  "group" in mydict else row
+                        new_widget = cls.create_custom_widgets(mydict, widget_info, widget_template, tmp_row, k)
             elif property_dict[v].fget != None:
                 pass
 
@@ -176,10 +175,21 @@ class VPyGUIGenerator:
             connection = widget_info.get_connection(k)
             if connection != None:
                 cls.__connections += connection
-               
-            widgets += new_widget
-            row += 1
+            if "group" in mydict:
+                group_name = mydict["group"]
+                if group_name not in cls.__group_widgets:
+                    cls.__group_widgets[group_name] = []
+                cls.__group_widgets[group_name].append(new_widget)
+            else:
+                widgets += new_widget
+                row += 1
 
+        if len(cls.__group_widgets) > 0:
+            groups = cls.add_group_to_form(row)
+            widgets += groups
+        
+            
+            
         return widgets
 
     @classmethod
@@ -233,6 +243,33 @@ class VPyGUIGenerator:
                     columns.append(k)
 
         return columns
+    
+    @classmethod    
+    def add_group_to_form(cls, row):
+        result = ""
+        file=open(f"{VPyGUIGenerator.script_location}/templates/tab_widget_tamplate.ui","r")
+        result = file.read()        
+        file.close()
+        result = result.replace("__tab_row__", str(row))
         
+        file=open(f"{VPyGUIGenerator.script_location}/templates/tab_child_template.ui","r")
+        tab_template = file.read()        
+        file.close()
+        
+        tabs = ""
+        for k, widgets in cls.__group_widgets.items():
+            tab = tab_template.replace("__name__", k)
+            row = 0
+            content = ""
+            for w in widgets:
+                w = w.replace("__row__", str(row))
+                content += w
+                row += 1
+            tab = tab.replace("__content__", content)
+            tabs += tab
+        
+        result = result.replace("__tabs__", tabs)
+        return result
+
         
         

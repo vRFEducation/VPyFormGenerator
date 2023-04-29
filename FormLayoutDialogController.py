@@ -11,7 +11,7 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         super(FormLayoutDialogController, self).__init__()
         uic.loadUi(template_file_name, self)
         self.resize(self.sizeHint().width(), self.size().height() );
-        self.connect_predefined_slots()
+        self.connect_predefined_slots(self)
         self.obj = obj
         self.__objectListDict = {}
         self.__filteredObjectListDict = {}
@@ -22,10 +22,12 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         self.__edited_obj = None
         self.__edited_grid_obj = {}
         self.__deleted_grid_obj = {}
-        self.finalize_ui()
+        self.finalize_ui(self)
     
-    def connect_predefined_slots(self):     
-        for w in self.children():
+    def connect_predefined_slots(self, parent):     
+        for w in parent.children():
+            if len(w.children()) > 0:
+                self.connect_predefined_slots(w)
             is_list_button = w.property("for_list")
             if is_list_button != None:
                 if w.objectName().startswith("add"):
@@ -98,8 +100,11 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/add.png"))
 
 
-    def finalize_ui(self):
-        for w in self.children():
+    def finalize_ui(self, parent):
+        for w in parent.children():
+            if len(w.children()) > 0:
+                self.finalize_ui(w)
+            
             prop_name = w.property('prop_name')
             if prop_name == 'simplegrid':
                 w.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
@@ -139,8 +144,10 @@ class FormLayoutDialogController(QtWidgets.QDialog):
             if self.__edited_obj == None:
                 self.__edited_obj = type(self.obj)()
             obj = self.__edited_obj
+        
+        widget_list = self.findChildren(QtWidgets.QWidget, options= QtCore.Qt.FindChildOption.FindChildrenRecursively)
+        for w in widget_list:
             
-        for w in self.children():
             field_name = w.property("field_name")
             if field_name != None:
                 key = w.property("key")
@@ -177,15 +184,16 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     datasource = self.__objectListDict[grid_name]
                     
                     while index < len(datasource):
-                        obj = datasource[index]
-                        if grid_obj_deleted and obj.v_id in self.__deleted_grid_obj[grid_name]:
-                            datasource.remove(obj)
+                        tmp_obj = datasource[index]
+                        if grid_obj_deleted and tmp_obj.v_id in self.__deleted_grid_obj[grid_name]:
+                            datasource.remove(tmp_obj)
                             continue                            
-                        if grid_obj_edited and obj.v_id in self.__edited_grid_obj[grid_name]:
-                            datasource[index] = self.__edited_grid_obj[grid_name][obj.v_id]
+                        if grid_obj_edited and tmp_obj.v_id in self.__edited_grid_obj[grid_name]:
+                            datasource[index] = self.__edited_grid_obj[grid_name][tmp_obj.v_id]
                         index += 1
-                        del obj.v_id
-                    setattr(self.obj, field_name, datasource)
+                        if hasattr(tmp_obj, "v_id"):
+                            del tmp_obj.v_id
+                    setattr(obj, field_name, datasource)
 
         super().accept()
         

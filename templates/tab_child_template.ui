@@ -1,0 +1,8 @@
+<widget class="QWidget" name="tab___name__">
+    <attribute name="title">
+     <string>__name__</string>
+    </attribute>
+    <layout class="QFormLayout" name="formLayout___name__">
+        __content__
+    </layout>
+</widget>

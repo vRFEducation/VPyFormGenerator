@@ -51,3 +51,9 @@
 ### Added or Changed
 - Minor bugs in SimpleGrid widget resolved
 - Filtering option added to SimpleGrid widget
+
+
+## v0.4.0
+
+### Added or Changed
+- Grouping option via QTabWidget added

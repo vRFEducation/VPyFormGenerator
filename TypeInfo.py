@@ -148,7 +148,6 @@ class TypeInfo:
             self.extra_data[k] = v
             originalKey = k;
             k = k.lower()
-            
             if k == "widget":
                 widget = v.lower()
                 continue    #it handled before
