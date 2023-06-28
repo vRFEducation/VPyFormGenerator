@@ -98,6 +98,20 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                 elif w.objectName().startswith("btnAddNew"):
                     w.clicked.connect(self.simpleGridAddNewButtonClicked)
                     w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/add.png"))
+                    
+            is_file_widget_button = w.property("for_file_widget")
+            if is_file_widget_button != None:
+                w.clicked.connect(self.fileWidgetButtonClicked)
+                file_widget = self.get_widget(w.property("for_file_widget"))
+                type = file_widget.property("type")
+                if type == None or type.lower() not in("save", "folder"):
+                    type = "open"
+                w.setIcon(QtGui.QIcon(f"{FormLayoutDialogController.script_location}/icons/{type}.png"))
+                w.setProperty("type", type)
+                filters = file_widget.property("filters")
+                w.setProperty("filters", filters)                
+                continue
+
 
 
     def finalize_ui(self, parent):
@@ -194,8 +208,33 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                         if hasattr(tmp_obj, "v_id"):
                             del tmp_obj.v_id
                     setattr(obj, field_name, datasource)
+                elif(key == "file"):
+                    setattr(obj, field_name, w.property(field))
+
 
         super().accept()
+        
+    @pyqtSlot()
+    def fileWidgetButtonClicked(self):
+        type =  self.sender().property("type")
+        widget_name = self.sender().property("for_file_widget")
+        filename = ""
+        filters = "All Files (*)"
+        tmp_filters = self.sender().property("filters")
+        filters = tmp_filters if tmp_filters != None else filters
+        print(tmp_filters)
+        if type == "save":
+            filename, _ = QtWidgets.QFileDialog.getSaveFileName(self,widget_name.capitalize(), "", filters)
+        elif type == "folder":
+            filename = QtWidgets.QFileDialog.getExistingDirectory(self,widget_name.capitalize(), "")
+        else:
+            filename, _ = QtWidgets.QFileDialog.getOpenFileName(self,widget_name.capitalize(), "", filters)
+        
+        line_edit = self.get_widget(widget_name)
+        if line_edit != None:
+            line_edit.setText(filename)
+            
+        
         
     @pyqtSlot()
     def listAddButtonClicked(self):
