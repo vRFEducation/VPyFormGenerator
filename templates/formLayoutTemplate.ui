@@ -46,6 +46,7 @@
  </connections>
   <slots>
     <slot>listAddButtonClicked()</slot>
+    <slot>fileWidgetButtonClicked()</slot>
     <slot>listDeleteButtonClicked()</slot>
     <slot>objectDetailButtonClicked()</slot>
     <slot>tableAddButtonClicked()</slot>

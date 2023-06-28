@@ -14,7 +14,9 @@ class VPyGUIGenerator:
         "time": TypeInfo("QTimeEdit", "time", "time", "time"),
         "datetime": TypeInfo("QDateTimeEdit", "datetime", "datetime", "datetime"),
         "dict" : TypeInfo("QTableWidget", "dict", "string", "dict"),
-        "object": TypeInfo("QLabel", "text", "string", "object")
+        "object": TypeInfo("QLabel", "text", "string", "object"),
+        "file" : TypeInfo("QLineEdit", "text", "string", "file"),        
+
     }
     
     widget_dict = {
@@ -53,6 +55,7 @@ class VPyGUIGenerator:
         "qtime": TypeInfo("QTimeEdit", "time", "time", "time"),
         "qdatetime": TypeInfo("QDateTimeEdit", "datetime", "datetime", "datetime"),
         "simplegrid" : TypeInfo("QTableWidget", "simplegrid", "list", "simplegrid"),        
+        "file" : TypeInfo("QLineEdit", "text", "string", "file"),        
     }
     
     script_location = Path(__file__).absolute().parent
