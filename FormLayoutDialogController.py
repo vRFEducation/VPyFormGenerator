@@ -111,6 +111,16 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                 filters = file_widget.property("filters")
                 w.setProperty("filters", filters)                
                 continue
+            
+            is_image_widget_link = w.property("for_image_widget")
+            if is_image_widget_link != None:
+                if w.objectName().startswith("lblChangeImage"):
+                    w.linkActivated.connect(self.imageWidgetChangeButtonClicked)
+                elif w.objectName().startswith("lblRemoveImage"):
+                    w.linkActivated.connect(self.imageWidgetRemoveButtonClicked)
+
+                continue
+
 
 
 
@@ -119,8 +129,8 @@ class FormLayoutDialogController(QtWidgets.QDialog):
             if len(w.children()) > 0:
                 self.finalize_ui(w)
             
-            prop_name = w.property('prop_name')
-            if prop_name == 'simplegrid':
+            key = w.property('key')
+            if key == 'simplegrid':
                 w.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
                 page_count = int(w.property("page_count"))
                 grid_name = w.property("field_name")
@@ -141,11 +151,31 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     tmp_id += 1
                     self.__objectListDict[field].append(obj)
                     self.__filteredObjectListDict[field].append(obj)
-                # self.add_grid_action(field)
-                # tmp_filtering = w.property("showFiltering")
-                # if tmp_filtering!= None and tmp_filtering.lower() == "true":
-                #     self.add_grid_filter(field)
                 self.load_simple_grid_data(grid_name)
+            elif key == "image":
+                ispath = w.property("ispath")
+                w.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+                                                 QtWidgets.QSizePolicy.Policy.MinimumExpanding))
+                image = None
+                if ispath == None or ispath:
+                    filename = w.text()
+                    if not QtCore.QFile.exists(w.text()):
+                        filename = f"{FormLayoutDialogController.script_location}/icons/notfound.png"
+                    image = QtGui.QPixmap(filename)
+                else:
+                    image = QtGui.QPixmap()
+                    image.loadFromData(self.obj.photo)
+                self.load_image(w, image)
+                
+                options_visible = w.property("options")
+                if options_visible != None and not options_visible:
+                    field = w.property("field_name")
+                    option_widget = self.get_widget(f"options_for_{field}")
+                    option_widget.setVisible(False)
+                    
+                    
+                    
+                
     
     @pyqtSlot()
     def reject(self):
@@ -210,9 +240,67 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     setattr(obj, field_name, datasource)
                 elif(key == "file"):
                     setattr(obj, field_name, w.property(field))
+                elif(key == "image"):
+                    ispath = w.property("ispath")
+                    if ispath == None or ispath :
+                        setattr(obj, field_name, w.property("path"))
+                    else:
+                        pixmap = w.pixmap()
+                        ba = QtCore.QByteArray()
+                        buff = QtCore.QBuffer(ba)
+                        buff.open(QtCore.QIODevice.OpenModeFlag.WriteOnly) 
+                        ok = pixmap.save(buff, "PNG")
+                        setattr(obj, field_name, ba.data())
+                        buff.close
+                        
+
+
 
 
         super().accept()
+        
+    @pyqtSlot()
+    def imageWidgetRemoveButtonClicked(self):
+        widget_name = self.sender().property("for_image_widget")
+        label = self.get_widget(widget_name) 
+        label.setProperty("path", "")
+        label.setText(' ')
+    
+    @pyqtSlot()
+    def imageWidgetChangeButtonClicked(self):
+        widget_name = self.sender().property("for_image_widget")
+        filename = ""
+        filters = "Image Files (*.jpg; *.png; *.gif; *.bmp)"
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self,widget_name.capitalize(), "", filters)
+        if filename == '':
+            return
+        label = self.get_widget(widget_name)
+        field_name = label.property("field_name")
+        if label != None:
+            ispath = label.property("ispath")
+            image = None
+            if ispath == None or ispath:
+                if not QtCore.QFile.exists(filename):
+                    filename = f"{FormLayoutDialogController.script_location}/icons/notfound.png"
+                image = QtGui.QPixmap(filename)
+                label.setProperty("path", filename)
+                self.load_image(label, image)
+            else:
+                with open(filename, 'rb') as file:
+                    data = file.read()
+                    image = QtGui.QPixmap()
+                    image.loadFromData(data)                    
+                    
+            self.load_image(label, image)
+                    
+                    
+
+                
+                
+    def load_image(self, label, image):
+        w = label.width()
+        h = label.height()
+        label.setPixmap(image.scaled(w,h,QtCore.Qt.AspectRatioMode.KeepAspectRatio))
         
     @pyqtSlot()
     def fileWidgetButtonClicked(self):
@@ -222,7 +310,6 @@ class FormLayoutDialogController(QtWidgets.QDialog):
         filters = "All Files (*)"
         tmp_filters = self.sender().property("filters")
         filters = tmp_filters if tmp_filters != None else filters
-        print(tmp_filters)
         if type == "save":
             filename, _ = QtWidgets.QFileDialog.getSaveFileName(self,widget_name.capitalize(), "", filters)
         elif type == "folder":
