@@ -102,6 +102,8 @@ class TypeInfo:
             file_name = f"{TypeInfo.script_location}/templates/object_extra_prefix.ui"
         elif self.key == "file":
             file_name = f"{TypeInfo.script_location}/templates/file_widget_extra_prefix.ui"
+        elif self.key == "image":
+            file_name = f"{TypeInfo.script_location}/templates/image_widget_extra_prefix.ui"
         elif self.key == "dict" and ("showTools" not in self.extra_data or self.extra_data["showTools"] == "true"):
             file_name = f"{TypeInfo.script_location}/templates/table_widget_extra_prefix.ui"
         elif self.key == "slider" and "showLabel" in self.extra_data:
@@ -128,6 +130,8 @@ class TypeInfo:
             file_name = f"{TypeInfo.script_location}/templates/object_extra_postfix.ui"
         elif self.key == "file":
             file_name = f"{TypeInfo.script_location}/templates/file_widget_extra_postfix.ui"
+        elif self.key == "image":
+            file_name = f"{TypeInfo.script_location}/templates/image_widget_extra_postfix.ui"
         elif self.key == "dict" and ("showTools" not in self.extra_data or self.extra_data["showTools"] == "true"):
             file_name = f"{TypeInfo.script_location}/templates/table_widget_extra_postfix.ui"
         elif self.key == "slider" and "showLabel" in self.extra_data:

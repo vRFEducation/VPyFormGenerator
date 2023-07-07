@@ -16,6 +16,7 @@ class VPyGUIGenerator:
         "dict" : TypeInfo("QTableWidget", "dict", "string", "dict"),
         "object": TypeInfo("QLabel", "text", "string", "object"),
         "file" : TypeInfo("QLineEdit", "text", "string", "file"),        
+        "image" : TypeInfo("QLabel", "text", "string", "image"),        
 
     }
     
@@ -56,6 +57,7 @@ class VPyGUIGenerator:
         "qdatetime": TypeInfo("QDateTimeEdit", "datetime", "datetime", "datetime"),
         "simplegrid" : TypeInfo("QTableWidget", "simplegrid", "list", "simplegrid"),        
         "file" : TypeInfo("QLineEdit", "text", "string", "file"),        
+        "image" : TypeInfo("QLabel", "text", "string", "image"),        
     }
     
     script_location = Path(__file__).absolute().parent
@@ -165,8 +167,12 @@ class VPyGUIGenerator:
                 else:
                     value = ""
             
-            new_widget = new_widget.replace("__content__", widget_info.get_content(value))
-            new_widget = new_widget.replace("__value__", str(value))
+            if mydict["widget"].lower() == "image" and  ("ispath" in mydict and mydict["ispath"] == "false"):
+                new_widget = new_widget.replace("__content__", '')
+                new_widget = new_widget.replace("__value__", '')
+            else: 
+                new_widget = new_widget.replace("__content__", widget_info.get_content(value))
+                new_widget = new_widget.replace("__value__", str(value))
             
             if mydict["widget"].lower() == "simplegrid":
                 import math
