@@ -120,10 +120,13 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     w.linkActivated.connect(self.imageWidgetRemoveButtonClicked)
 
                 continue
-
-
-
-
+            
+            is_images_widget_link = w.property("for_images_widget")
+            if is_images_widget_link != None:
+                if w.objectName().startswith("lblImagesChangeFolder"):
+                    w.linkActivated.connect(self.imagesWidgetChangeDirectoryButtonClicked)
+                continue
+            
     def finalize_ui(self, parent):
         for w in parent.children():
             if len(w.children()) > 0:
@@ -172,6 +175,17 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     field = w.property("field_name")
                     option_widget = self.get_widget(f"options_for_{field}")
                     option_widget.setVisible(False)
+            elif key == "images":
+                field = w.property("field_name")
+                path = getattr(self.obj, field)
+                self.load_images(field, path)
+                
+                options_visible = w.property("options")
+                if options_visible != None and not options_visible:
+                    field = w.property("field_name")
+                    option_widget = self.get_widget(f"lblImagesChangeFolder_{field}")
+                    option_widget.setVisible(False)
+
                     
                     
                     
@@ -252,13 +266,21 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                         ok = pixmap.save(buff, "PNG")
                         setattr(obj, field_name, ba.data())
                         buff.close
-                        
-
-
-
-
+                elif(key == "images"):
+                    path = w.property("newPath")
+                    setattr(obj, field_name, path)
         super().accept()
+    
+    @pyqtSlot()
+    def imagesWidgetChangeDirectoryButtonClicked(self):
+        widget_name = self.sender().property("for_images_widget")
+        filename = ""
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self,widget_name.capitalize(), "")
+        if filename == '':
+            return
+        self.load_images(widget_name, filename)
         
+     
     @pyqtSlot()
     def imageWidgetRemoveButtonClicked(self):
         widget_name = self.sender().property("for_image_widget")
@@ -292,15 +314,65 @@ class FormLayoutDialogController(QtWidgets.QDialog):
                     image.loadFromData(data)                    
                     
             self.load_image(label, image)
-                    
-                    
-
-                
-                
+            
     def load_image(self, label, image):
         w = label.width()
         h = label.height()
         label.setPixmap(image.scaled(w,h,QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        
+    def load_images(self, widget_name, path):
+        widget = self.get_widget(widget_name)
+        widget.setProperty("newPath", path)
+        content_widget = self.get_widget(f"hLayout_{widget_name}")
+        path_widget = self.get_widget(f"lblImagesDirectoryPath_{widget_name}")
+        scroll_widget = self.get_widget(widget_name)
+        photo_size = scroll_widget.property("photoSize")
+        size = None
+        if photo_size != None:
+            tmp_size = photo_size.replace("[", "").replace("]", "").split(";")
+            size = QtCore.QSize(int(tmp_size[0]), int(tmp_size[1]))  
+
+        while content_widget.count() >= 1:
+            count = content_widget.count()
+            item = content_widget.itemAt(count - 1)
+            widget = item.widget()
+            widget.deleteLater()
+            content_widget.removeItem(item)
+                    
+        import os
+        files = os.listdir(path)
+        for file in files:
+            if file.endswith(('.jpg', '.png', 'jpeg')):
+                img_path = f"{path}/{file}"
+                lbl = QtWidgets.QLabel()
+                if size != None:
+                    lbl.setMinimumSize(size)
+                    lbl.setMaximumSize(size)
+                image = QtGui.QPixmap(img_path)
+                self.load_image(lbl, image)
+                lbl.setCursor(QtCore.Qt.CursorShape.OpenHandCursor)
+                lbl.installEventFilter(self) 
+                lbl.setProperty("imagePath", img_path)
+                lbl.setToolTip(img_path)
+                content_widget.addWidget(lbl)
+        
+        path_widget.setText(path)
+        
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.Type.MouseButtonPress:
+            filepath = source.property("imagePath")
+            import subprocess, os, platform
+            if platform.system() == 'Darwin':       # macOS
+                subprocess.call(('open', filepath))
+            elif platform.system() == 'Windows':    # Windows
+                os.startfile(filepath)
+            else:                                   # linux variants
+                subprocess.call(('xdg-open', filepath))
+
+        return super(FormLayoutDialogController, self).eventFilter(source, event)
+        
+        
+        
         
     @pyqtSlot()
     def fileWidgetButtonClicked(self):
