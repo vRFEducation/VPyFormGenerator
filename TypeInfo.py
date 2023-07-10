@@ -31,7 +31,7 @@ class TypeInfo:
             if value in self.extra_data["combo_items"]:
                 index = self.extra_data["combo_items"].index(value)
             content = content.replace("__value__", str(index))
-        elif self.widget_name == "QScrollArea":
+        elif self.key == "multichoice":
             if len(self.extra_data["items"]) > 0:
                 orientation = "QVBoxLayout"
                 if "orientation" in self.extra_data:
@@ -67,6 +67,19 @@ class TypeInfo:
                     </layout>
                 </widget>
                 """
+        elif self.key == "images":
+            content = """
+             <property name="widgetResizable">
+                <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents___name__">
+                <property name="styleSheet">
+                    <string notr="true">QLabel:hover{background-color: rgb(188, 232, 255);}</string>
+                </property>
+                <layout class="QHBoxLayout" name="hLayout___name__"> 
+                </layout>
+            </widget>
+            """
         elif self.key == "simplegrid":
             content = self.create_simple_grid(value)
         else:            
@@ -104,6 +117,8 @@ class TypeInfo:
             file_name = f"{TypeInfo.script_location}/templates/file_widget_extra_prefix.ui"
         elif self.key == "image":
             file_name = f"{TypeInfo.script_location}/templates/image_widget_extra_prefix.ui"
+        elif self.key == "images":
+            file_name = f"{TypeInfo.script_location}/templates/images_widget_extra_prefix.ui"
         elif self.key == "dict" and ("showTools" not in self.extra_data or self.extra_data["showTools"] == "true"):
             file_name = f"{TypeInfo.script_location}/templates/table_widget_extra_prefix.ui"
         elif self.key == "slider" and "showLabel" in self.extra_data:
@@ -132,6 +147,8 @@ class TypeInfo:
             file_name = f"{TypeInfo.script_location}/templates/file_widget_extra_postfix.ui"
         elif self.key == "image":
             file_name = f"{TypeInfo.script_location}/templates/image_widget_extra_postfix.ui"
+        elif self.key == "images":
+            file_name = f"{TypeInfo.script_location}/templates/images_widget_extra_postfix.ui"
         elif self.key == "dict" and ("showTools" not in self.extra_data or self.extra_data["showTools"] == "true"):
             file_name = f"{TypeInfo.script_location}/templates/table_widget_extra_postfix.ui"
         elif self.key == "slider" and "showLabel" in self.extra_data:

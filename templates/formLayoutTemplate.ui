@@ -49,6 +49,7 @@
     <slot>fileWidgetButtonClicked()</slot>
     <slot>imageWidgetRemoveButtonClicked()</slot>
     <slot>imageWidgetChangeButtonClicked()</slot>
+    <slot>imagesWidgetChangeDirectoryButtonClicked()</slot>
     <slot>listDeleteButtonClicked()</slot>
     <slot>objectDetailButtonClicked()</slot>
     <slot>tableAddButtonClicked()</slot>

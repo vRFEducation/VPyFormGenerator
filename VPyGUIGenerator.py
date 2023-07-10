@@ -58,6 +58,8 @@ class VPyGUIGenerator:
         "simplegrid" : TypeInfo("QTableWidget", "simplegrid", "list", "simplegrid"),        
         "file" : TypeInfo("QLineEdit", "text", "string", "file"),        
         "image" : TypeInfo("QLabel", "text", "string", "image"),        
+        "images": TypeInfo("QScrollArea", "images", "string", "images"),
+        
     }
     
     script_location = Path(__file__).absolute().parent
@@ -173,6 +175,8 @@ class VPyGUIGenerator:
             else: 
                 new_widget = new_widget.replace("__content__", widget_info.get_content(value))
                 new_widget = new_widget.replace("__value__", str(value))
+                if mydict["widget"] == "images":
+                    new_widget = new_widget.replace("__name__", k)
             
             if mydict["widget"].lower() == "simplegrid":
                 import math
